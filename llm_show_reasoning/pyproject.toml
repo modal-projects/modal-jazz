@@ -1,0 +1,7 @@
+[project]
+name = "llm-show-reasoning"
+version = "0.1.0"
+dependencies = ["llm", "httpx"]
+
+[project.entry-points.llm]
+show_reasoning = "llm_show_reasoning"
