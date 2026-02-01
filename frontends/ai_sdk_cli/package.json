@@ -1,0 +1,8 @@
+{
+  "name": "ai-sdk-chat",
+  "type": "module",
+  "dependencies": {
+    "@ai-sdk/openai-compatible": "^2.0",
+    "ai": "^6.0"
+  }
+}
