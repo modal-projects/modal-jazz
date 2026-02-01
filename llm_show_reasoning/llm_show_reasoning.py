@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import json
 from typing import Iterable, Iterator, Optional
 
@@ -9,7 +7,7 @@ import llm
 
 @llm.hookimpl
 def register_models(register):
-    register(CodalReasoning(), aliases=("codal",))
+    register(JazzReasoning(), aliases=("jazz",))
 
 ANSI = {
     "reset": "\x1b[0m",
@@ -22,19 +20,18 @@ ANSI = {
 }
 
 
-class CodalReasoning(llm.KeyModel):
+class JazzReasoning(llm.KeyModel):
     """
-    OpenAI-compatible Chat Completions client that also prints
-    SGLang-streamed delta.reasoning_content.
+    OpenAI-compatible Chat Completions client that also prints reasoning content.
     """
 
-    model_id = "codal"
+    model_id = "jazz"
     can_stream = True
     supports_schema = True
 
     class Options(llm.Options):
         api_base: str = (
-            "https://modal-labs-charles-dev--codal-backend-server.us-east.modal.direct/v1"
+            "https://modal-labs-charles-dev--jazz-backend-server.us-east.modal.direct/v1"
         )
         upstream_model: str = "llm"
         show_reasoning: bool = True
@@ -69,7 +66,7 @@ class CodalReasoning(llm.KeyModel):
         if prompt.system:
             messages.append({"role": "system", "content": prompt.system})
 
-        # Minimal conversation support: include previous turns if provided
+        # Minimal conversation support
         if conversation is not None:
             for prev in conversation.responses:
                 # prev.prompt.prompt may be None for tool-only turns; skip those
