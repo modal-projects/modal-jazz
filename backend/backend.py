@@ -21,7 +21,9 @@ import modal.experimental
 
 here = Path(__file__).parent
 
-image = modal.Image.from_registry("modalresearch/sglang:v0.5.7-fa4-preview").entrypoint([])
+image = modal.Image.from_registry("modalresearch/sglang:v0.5.7-fa4-preview").entrypoint(
+    []
+)
 
 hf_cache_vol = modal.Volume.from_name("huggingface-cache", create_if_missing=True)
 
@@ -112,7 +114,7 @@ with image.imports():
 
 # ## Configure infrastructure
 
-app = modal.App("codal-backend", image=image)
+app = modal.App("jazz-backend", image=image)
 
 GPU_TYPE = "B200"
 GPU_COUNT = 4
