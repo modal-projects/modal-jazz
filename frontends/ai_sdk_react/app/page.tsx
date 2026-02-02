@@ -3,22 +3,63 @@
 import { useChat } from "@ai-sdk/react";
 import { useEffect, useRef, useState } from "react";
 import type { UIMessage } from "ai";
+import ReactMarkdown, { type Components } from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeHighlight from "rehype-highlight";
 
 const SUGGESTIONS = [
-  "Explain how transformers work",
-  "Write a Python hello world",
+  "Explain how transformers work.",
+  "Write five different programs for me in both Python and Rust.",
   "What is Modal and how does it work?",
 ];
 
-// --- Sub-components ---
+const markdownComponents: Components = {
+  code({ className, children, ...props }) {
+    const isBlock = className?.startsWith("hljs");
+    if (isBlock) {
+      return (
+        <code className={className} {...props}>
+          {children}
+        </code>
+      );
+    }
+    return (
+      <code
+        className="bg-green-dim text-green-bright px-1.5 py-0.5 rounded text-xs font-mono"
+        {...props}
+      >
+        {children}
+      </code>
+    );
+  },
+  a({ children, ...props }) {
+    return (
+      <a target="_blank" rel="noopener noreferrer" {...props}>
+        {children}
+      </a>
+    );
+  },
+};
+
+function MarkdownContent({ children }: { children: string }) {
+  return (
+    <div className="prose prose-sm prose-invert max-w-none">
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        rehypePlugins={[rehypeHighlight]}
+        components={markdownComponents}
+      >
+        {children}
+      </ReactMarkdown>
+    </div>
+  );
+}
 
 function EmptyState({ onSend }: { onSend: (text: string) => void }) {
   return (
-    <div className="flex-1 flex flex-col items-center justify-center gap-6 px-4">
-      <h2 className="text-4xl font-light text-green-bright">Modal Jazz</h2>
-      <p className="text-text-primary/50 text-sm">
-        Ask anything. Powered by Modal.
-      </p>
+    <div className="flex-1 flex flex-col items-center justify-center px-4 gap-6">
+      <h2 className="text-4xl font-light text-green-bright py-4">Modal Jazz</h2>
+      <p className="text-text-primary/50 text-sm">Ask me anything.</p>
       <div className="flex flex-wrap justify-center gap-2 max-w-lg">
         {SUGGESTIONS.map((s) => (
           <button
@@ -87,22 +128,30 @@ function MessageBubble({
                 <summary className="px-3 py-2 text-xs text-text-primary/50 font-mono cursor-pointer hover:bg-green-dim transition-colors">
                   Reasoning
                 </summary>
-                <pre className="px-3 py-2 text-xs text-text-primary/60 font-mono whitespace-pre-wrap border-t border-border">
-                  {part.text}
-                </pre>
+                <div className="px-3 py-2 text-xs text-text-primary/60 font-mono border-t border-border">
+                  <MarkdownContent>{part.text}</MarkdownContent>
+                </div>
               </details>
             );
           }
           if (part.type === "text") {
+            if (isUser) {
+              return (
+                <p
+                  key={i}
+                  className="whitespace-pre-wrap text-sm leading-relaxed"
+                >
+                  {part.text}
+                </p>
+              );
+            }
             return (
-              <p key={i} className="whitespace-pre-wrap text-sm leading-relaxed">
-                {part.text}
-                {isStreaming &&
-                  !isUser &&
-                  i === message.parts.length - 1 && (
-                    <span className="inline-block w-2 h-4 ml-0.5 bg-green-bright/80 rounded-sm animate-pulse align-middle" />
-                  )}
-              </p>
+              <div key={i} className="text-sm leading-relaxed">
+                <MarkdownContent>{part.text}</MarkdownContent>
+                {isStreaming && i === message.parts.length - 1 && (
+                  <span className="inline-block w-2 h-4 ml-0.5 bg-green-bright/80 rounded-sm animate-pulse align-middle" />
+                )}
+              </div>
             );
           }
           return null;
@@ -111,8 +160,6 @@ function MessageBubble({
     </div>
   );
 }
-
-// --- Main page ---
 
 export default function Chat() {
   const { messages, sendMessage, status } = useChat();

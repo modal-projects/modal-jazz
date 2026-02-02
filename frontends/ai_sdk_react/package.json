@@ -5,7 +5,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "deploy": "vercel deploy"
+    "preview": "vercel deploy",
+    "deploy": "vercel deploy --prod"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^2.0",
@@ -13,10 +14,14 @@
     "ai": "^6.0",
     "next": "^15",
     "react": "^19",
-    "react-dom": "^19"
+    "react-dom": "^19",
+    "react-markdown": "^10.1.0",
+    "rehype-highlight": "^7.0.2",
+    "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.18",
+    "@tailwindcss/typography": "^0.5.19",
     "@types/node": "^22",
     "@types/react": "^19",
     "postcss": "^8.5.6",

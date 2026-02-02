@@ -25,12 +25,12 @@ export default function RootLayout({
       <body className="min-h-screen flex flex-col font-sans">
         {/* Header */}
         <header className="border-b border-border px-6 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <a href="/" className="flex items-center gap-3">
             <span className="text-green-bright font-semibold text-lg">
               Modal Jazz
             </span>
             <span className="text-text-primary/50 text-sm">Chat</span>
-          </div>
+          </a>
           <a
             href="https://github.com/modal-projects/modal-jazz"
             target="_blank"
