@@ -24,7 +24,7 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} ${jetbrains.variable}`}>
       <body className="min-h-screen flex flex-col font-sans">
         {/* Header */}
-        <header className="border-b border-border px-6 py-3 flex items-center justify-between">
+        <header className="border-b border-border px-4 sm:px-6 py-3 flex items-center justify-between">
           <a href="/" className="flex items-center gap-3">
             <span className="text-green-bright font-semibold text-lg">
               Modal Jazz
@@ -37,7 +37,7 @@ export default function RootLayout({
             rel="noopener noreferrer"
             className="text-text-primary/50 hover:text-green-bright transition-colors text-sm"
           >
-            See the code on GitHub
+            GitHub
           </a>
         </header>
 
@@ -45,7 +45,7 @@ export default function RootLayout({
         <main className="flex-1 flex flex-col">{children}</main>
 
         {/* Footer */}
-        <footer className="border-t border-border px-6 py-3 text-center text-xs text-text-primary/40">
+        <footer className="border-t border-border px-4 sm:px-6 py-3 text-center text-xs text-text-primary/40">
           Built with{" "}
           <a
             href="https://modal.com"

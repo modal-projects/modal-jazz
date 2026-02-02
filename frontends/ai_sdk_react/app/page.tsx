@@ -43,7 +43,7 @@ const markdownComponents: Components = {
 
 function MarkdownContent({ children }: { children: string }) {
   return (
-    <div className="prose prose-sm prose-invert max-w-none">
+    <div className="prose-xs sm:prose-sm prose-invert max-w-none">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeHighlight]}
@@ -58,7 +58,7 @@ function MarkdownContent({ children }: { children: string }) {
 function EmptyState({ onSend }: { onSend: (text: string) => void }) {
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-4 gap-6">
-      <h2 className="text-4xl font-light text-green-bright py-4">Modal Jazz</h2>
+      <h2 className="text-3xl sm:text-4xl font-light text-green-bright py-4">Modal Jazz</h2>
       <p className="text-text-primary/50 text-sm">Ask me anything.</p>
       <div className="flex flex-wrap justify-center gap-2 max-w-lg">
         {SUGGESTIONS.map((s) => (
@@ -108,7 +108,7 @@ function MessageBubble({
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
       <div
-        className={`max-w-[85%] rounded-2xl px-5 py-4 ${
+        className={`max-w-[95%] sm:max-w-[85%] rounded-2xl px-4 py-3 sm:px-5 sm:py-4 ${
           isUser ? "bg-green-dim" : "bg-bg-container"
         }`}
       >
@@ -139,14 +139,14 @@ function MessageBubble({
               return (
                 <p
                   key={i}
-                  className="whitespace-pre-wrap text-sm leading-relaxed"
+                  className="whitespace-pre-wrap text-xs sm:text-sm leading-relaxed"
                 >
                   {part.text}
                 </p>
               );
             }
             return (
-              <div key={i} className="text-sm leading-relaxed">
+              <div key={i} className="text-xs sm:text-sm leading-relaxed">
                 <MarkdownContent>{part.text}</MarkdownContent>
                 {isStreaming && i === message.parts.length - 1 && (
                   <span className="inline-block w-2 h-4 ml-0.5 bg-green-bright/80 rounded-sm animate-pulse align-middle" />
@@ -220,13 +220,13 @@ export default function Chat() {
 
       {/* Input area */}
       <div className="border-t border-border">
-        <div className="max-w-3xl mx-auto w-full px-4 py-4">
+        <div className="w-full px-4 py-4">
           <form
             onSubmit={(e) => {
               e.preventDefault();
               handleSend(input);
             }}
-            className="flex gap-3 items-end"
+            className="flex gap-3 items-end max-w-3xl mx-auto"
           >
             <textarea
               ref={textareaRef}
