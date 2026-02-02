@@ -1,4 +1,5 @@
 import json
+import os
 from typing import Iterable, Iterator, Optional
 
 import httpx
@@ -25,13 +26,14 @@ class JazzReasoning(llm.KeyModel):
     OpenAI-compatible Chat Completions client that also prints reasoning content.
     """
 
-    model_id = "jazz"
+    model_id = "modal-jazz"
     can_stream = True
     supports_schema = True
 
     class Options(llm.Options):
-        api_base: str = (
-            "https://modal-labs-charles-dev--jazz-backend-server.us-east.modal.direct/v1"
+        api_base: str = os.environ.get(
+            "JAZZ_API_BASE",
+            "https://PLEASE_CONFIGURE_JAZZ_API_BASE/v1"
         )
         upstream_model: str = "llm"
         show_reasoning: bool = True
@@ -88,6 +90,14 @@ class JazzReasoning(llm.KeyModel):
     ) -> Iterator[str]:
         opts = prompt.options
         api_base = opts.api_base.rstrip("/")
+
+        if "PLEASE_CONFIGURE_JAZZ_API_BASE" in api_base:
+            raise ValueError(
+                "Jazz API base URL is not configured.\n"
+                "Set it with:\n"
+                "     llm models options set jazz api_base https://your-endpoint.com/v1"
+            )
+
         url = f"{api_base}/chat/completions"
 
         headers = {"Content-Type": "application/json"}
@@ -168,6 +178,17 @@ class JazzReasoning(llm.KeyModel):
     ) -> Iterator[str]:
         opts = prompt.options
         api_base = opts.api_base.rstrip("/")
+
+        if "PLEASE_CONFIGURE_JAZZ_API_BASE" in api_base:
+            raise ValueError(
+                "Jazz API base URL is not configured.\n"
+                "Set it with one of these methods:\n"
+                "  1. Export JAZZ_API_BASE environment variable:\n"
+                "     export JAZZ_API_BASE='https://your-endpoint.com/v1'\n"
+                "  2. Set persistent configuration:\n"
+                "     llm models options set jazz api_base https://your-endpoint.com/v1"
+            )
+
         url = f"{api_base}/chat/completions"
 
         headers = {"Content-Type": "application/json"}
