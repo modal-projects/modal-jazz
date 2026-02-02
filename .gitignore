@@ -162,3 +162,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# OpenCode config
+opencode.json
