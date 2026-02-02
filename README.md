@@ -6,7 +6,7 @@
 
 > I’ll play it first and tell you what it is later.
 >
-> - Miles Davis, on vibe-coding
+> — Miles Davis, on vibe-coding
 
 This repository collects together a complete "open AI stack" --
 everything you need to run a smart language model and the interfaces
