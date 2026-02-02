@@ -4,8 +4,7 @@ import { convertToModelMessages, streamText } from "ai";
 const provider = createOpenAICompatible({
   name: "jazz",
   baseURL:
-    process.env.BASE_URL ||
-    "https://modal-labs-charles-dev--jazz-backend-server.us-east.modal.direct/v1",
+    process.env.LLM_BACKEND_URL || "",
 });
 
 export async function POST(req: Request) {
