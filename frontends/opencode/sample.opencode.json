@@ -1,0 +1,17 @@
+{
+    "$schema": "https://opencode.ai/config.json",
+    "provider": {
+        "jazz": {
+            "npm": "@ai-sdk/openai-compatible",
+            "name": "Modal Jazz",
+            "options": {
+                "baseURL": ""
+            },
+            "models": {
+                "llm": {
+                    "name": "LLM"
+                }
+            }
+        }
+    }
+}
