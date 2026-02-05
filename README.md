@@ -10,7 +10,7 @@
 
 This repository collects together a complete "open AI stack" --
 everything you need to run a smart language model and the interfaces
-that help it complete useful tasks.
+that help it complete useful tasks. It uses [Modal](https://modal.com).
 
 ## Open Language Modeling Backend
 
