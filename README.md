@@ -30,15 +30,15 @@ roughly in line with [performance reported in Artificial Analysis](https://artif
 
 ## Open Frontends - `/frontends`
 
-### Chat CLI - `llm`
+### Agentic Coding TUI + WebUI - OpenCode
 
-The [`llm` CLI tool from Simon Willison](https://github.com/simonw/llm) offers integration
-with OpenAI-compatible API providers, like our self-hosted LLM, via the same interface as OpenAI's models.
-Docs are [here](https://llm.datasette.io/en/stable/other-models.html).
+[OpenCode](https://opencode.ai) is a terminal user interface
+for connecting human users, language models, and computer terminals,
+akin to Anthropic's [Claude Code](https://code.claude.com/docs/en/overview)
+but with broader LLM API support.
 
-We demonstrate a small plugin in `llm_show_reasoning`
-that prints the LLM's reasoning output (not available from OpenAI reasoning models),
-reducing apparent latency.
+We provide instructions for integrating the self-hosted LLM with OpenCode
+and for deploying OpenCode servers on Modal.
 
 ### Chat Web UI - AI SDK
 
@@ -49,11 +49,17 @@ We demonstrate a simple integration of this stack with the self-hosted LLM --
 both a "hello world"-level integration with a NodeJS CLI
 and a proper NextJS app.
 
-### Agentic Coding TUI - OpenCode
+It is deployed [here](https://jazz.modal.chat).
 
-[OpenCode](https://opencode.ai) is a terminal user interface
-for connecting human users, language models, and computer terminals,
-akin to Anthropic's [Claude Code](https://code.claude.com/docs/en/overview)
-but with broader LLM API support.
+### Chat CLI - `llm`
 
-We provide instructions for integrating the self-hosted LLM with OpenCode.
+We like the [`llm` CLI tool from Simon Willison](https://github.com/simonw/llm)
+for running quick LLM queries from the terminal.
+
+It offers integration with OpenAI-compatible API providers, like our self-hosted LLM,
+via the same interface as OpenAI's models.
+Docs are [here](https://llm.datasette.io/en/stable/other-models.html).
+
+We demonstrate a small plugin in `llm_show_reasoning`
+that prints the LLM's reasoning output -- not available from OpenAI reasoning models,
+but available for open models). This reduces apparent latency.
