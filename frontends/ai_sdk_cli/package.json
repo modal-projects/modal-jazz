@@ -3,6 +3,7 @@
   "type": "module",
   "dependencies": {
     "@ai-sdk/openai-compatible": "^2.0",
-    "ai": "^6.0"
+    "ai": "^6.0",
+    "dotenv": "^16.4"
   }
 }

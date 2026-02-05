@@ -1,11 +1,15 @@
+import { config } from "dotenv";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { streamText } from "ai";
+
+config();
+
+const panic = (msg) => { throw new Error(msg) };
 
 const provider = createOpenAICompatible({
   name: "jazz",
   baseURL:
-    process.env.BASE_URL ||
-    "https://modal-labs-charles-dev--jazz-backend-server.us-east.modal.direct/v1",
+    process.env.LLM_BACKEND_URL ?? panic("provide an LLM_BACKEND_URL")
 });
 
 const result = streamText({
