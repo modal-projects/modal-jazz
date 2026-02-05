@@ -38,7 +38,16 @@ akin to Anthropic's [Claude Code](https://code.claude.com/docs/en/overview)
 but with broader LLM API support.
 
 We provide instructions for integrating the self-hosted LLM with OpenCode
-and for deploying OpenCode servers on Modal.
+and for deploying OpenCode servers on Modal
+[here](./frontends/opencode/README.md)
+
+### Agentic Assistant - OpenClaw
+
+[OpenClaw](https://docs.openclaw.ai) is an agentic assistant system
+designed for maximum integrability.
+
+We provide instructions for integration the self-hosted LLM with OpenClaw
+[here](./frontends/openclaw/README.md).
 
 ### Chat Web UI - AI SDK
 
@@ -47,7 +56,9 @@ for integrating JavaScript applications with LLMs.
 
 We demonstrate a simple integration of this stack with the self-hosted LLM --
 both a "hello world"-level integration with a NodeJS CLI
-and a proper NextJS app.
+[here](./frontends/ai_sdk_cli/README.md)
+and a proper NextJS app
+[here](./frontends/ai_sdk_react/README.md).
 
 It is deployed [here](https://jazz.modal.chat).
 
@@ -60,6 +71,6 @@ It offers integration with OpenAI-compatible API providers, like our self-hosted
 via the same interface as OpenAI's models.
 Docs are [here](https://llm.datasette.io/en/stable/other-models.html).
 
-We demonstrate a small plugin in `llm_show_reasoning`
+We demonstrate a small plugin in [`llm_show_reasoning`](./frontends/llm_show_reasoning/README.md)
 that prints the LLM's reasoning output -- not available from OpenAI reasoning models,
-but available for open models). This reduces apparent latency.
+but available for open models. This reduces apparent latency.
