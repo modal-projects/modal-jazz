@@ -1,0 +1,30 @@
+{
+    "models": {
+        "mode": "merge",
+        "providers": {
+            "modal-jazz": {
+                "baseUrl": "${LLM_BACKEND_URL}/v1",
+                "apiKey": "${LLM_BACKEND_API_KEY}",
+                "api": "openai-completions",
+                "models": [
+                    {
+                        "id": "llm",
+                        "name": "LLM",
+                        "reasoning": true,
+                        "input": [
+                            "text"
+                        ],
+                        "cost": {
+                            "input": 0,
+                            "output": 0,
+                            "cacheRead": 0,
+                            "cacheWrite": 0
+                        },
+                        "contextWindow": 128000,
+                        "maxTokens": 8192
+                    }
+                ]
+            }
+        }
+    }
+}
