@@ -2,7 +2,7 @@
 
 > The spirit of jazz is the spirit of openness.
 >
-> — Herbie Hancock, on software development
+> — Herbie Hancock, on software licensing
 
 > I’ll play it first and tell you what it is later.
 >
