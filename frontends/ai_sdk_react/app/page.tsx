@@ -43,7 +43,7 @@ const markdownComponents: Components = {
 
 function MarkdownContent({ children }: { children: string }) {
   return (
-    <div className="prose-xs sm:prose-sm prose-invert max-w-none">
+    <div className="prose prose-xs sm:prose-sm prose-invert max-w-none">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeHighlight]}
@@ -119,6 +119,58 @@ function MessageBubble({
         )}
 
         {message.parts.map((part, i) => {
+          if (part.type === "tool-webSearch") {
+            return (
+              <details
+                key={i}
+                className="my-2 border border-border rounded-xl overflow-hidden"
+              >
+                <summary className="px-3 py-2 text-xs text-green-bright/70 font-medium cursor-pointer hover:bg-green-dim transition-colors">
+                  Web Search
+                  {part.state === "input-available" && " (searching...)"}
+                </summary>
+                <div className="px-3 py-2 text-xs text-text-primary/80 border-t border-border">
+                  {part.state === "input-available" && (
+                    <div className="italic text-text-primary/50">
+                      Searching for: {(part.input as any)?.query}
+                    </div>
+                  )}
+                  {part.state === "output-available" && (
+                    <div className="space-y-2">
+                      {(part.output as any)?.results?.map((result: any, idx: number) => (
+                        <div
+                          key={idx}
+                          className="border-l-2 border-green-dim pl-2"
+                        >
+                          <a
+                            href={result.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-green-bright hover:underline font-medium block"
+                          >
+                            {result.title}
+                          </a>
+                          <div className="text-text-primary/60 text-xs mt-1 line-clamp-3">
+                            {result.content}
+                          </div>
+                        </div>
+                      ))}
+                      {!(part.output as any)?.results?.length && (
+                        <div className="text-text-primary/50 italic">
+                          No results found
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {part.state === "output-error" && (
+                    <div className="text-red-400/80 italic">
+                      Error: {(part as any).errorText}
+                    </div>
+                  )}
+                </div>
+              </details>
+            );
+          }
           if (part.type === "reasoning") {
             return (
               <details
