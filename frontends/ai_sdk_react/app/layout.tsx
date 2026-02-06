@@ -13,6 +13,12 @@ const jetbrains = JetBrains_Mono({
 
 export const metadata = {
   title: "Modal Jazz Chat",
+  openGraph: {
+    title: "Modal Jazz Chat",
+    description: "we have ai at home. built with vercel and modal",
+    type: "website",
+    siteName: "Modal Jazz",
+  },
 };
 
 export default function RootLayout({
