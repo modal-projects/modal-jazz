@@ -18,6 +18,7 @@ export const metadata = {
     description: "we have ai at home. built with vercel and modal",
     type: "website",
     siteName: "Modal Jazz",
+    images: ["https://modal-cdn.com/modal-jazz.jpg"],
   },
 };
 
