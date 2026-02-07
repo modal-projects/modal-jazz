@@ -8,7 +8,7 @@ import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 
 const SUGGESTIONS = [
-  "Explain how transformers work.",
+  "Explain how Transformers work.",
   "Write five different programs for me in both Python and Rust.",
   "What is Modal and how does it work?",
 ];
@@ -58,7 +58,9 @@ function MarkdownContent({ children }: { children: string }) {
 function EmptyState({ onSend }: { onSend: (text: string) => void }) {
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-4 gap-6">
-      <h2 className="text-3xl sm:text-4xl font-light text-green-bright py-4">Modal Jazz</h2>
+      <h2 className="text-3xl sm:text-4xl font-light text-green-bright py-4">
+        Modal Jazz
+      </h2>
       <p className="text-text-primary/50 text-sm">Ask me anything.</p>
       <div className="flex flex-wrap justify-center gap-2 max-w-lg">
         {SUGGESTIONS.map((s) => (
@@ -108,9 +110,10 @@ function MessageBubble({
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
       <div
-        className={`max-w-[95%] sm:max-w-[85%] rounded-2xl px-4 py-3 sm:px-5 sm:py-4 ${
+        className={`rounded-2xl px-4 py-3 sm:px-5 sm:py-4 ${
           isUser ? "bg-green-dim" : "bg-bg-container"
-        }`}
+        } ${isUser ? "max-w-[95%] sm:max-w-[85%]" : "w-[95%] sm:w-[85%]"}
+        `}
       >
         {!isUser && (
           <span className="block text-xs text-green-bright/70 font-medium mb-2">
@@ -137,24 +140,26 @@ function MessageBubble({
                   )}
                   {part.state === "output-available" && (
                     <div className="space-y-2">
-                      {(part.output as any)?.results?.map((result: any, idx: number) => (
-                        <div
-                          key={idx}
-                          className="border-l-2 border-green-dim pl-2"
-                        >
-                          <a
-                            href={result.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-green-bright hover:underline font-medium block"
+                      {(part.output as any)?.results?.map(
+                        (result: any, idx: number) => (
+                          <div
+                            key={idx}
+                            className="border-l-2 border-green-dim pl-2"
                           >
-                            {result.title}
-                          </a>
-                          <div className="text-text-primary/60 text-xs mt-1 line-clamp-3">
-                            {result.content}
+                            <a
+                              href={result.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-green-bright hover:underline font-medium block"
+                            >
+                              {result.title}
+                            </a>
+                            <div className="text-text-primary/60 text-xs mt-1 line-clamp-3">
+                              {result.content}
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ),
+                      )}
                       {!(part.output as any)?.results?.length && (
                         <div className="text-text-primary/50 italic">
                           No results found
@@ -253,7 +258,7 @@ export default function Chat() {
         {!hasMessages ? (
           <EmptyState onSend={handleSend} />
         ) : (
-          <div className="max-w-3xl mx-auto w-full px-4 py-6 flex flex-col gap-4">
+          <div className="w-[48rem] mx-auto px-4 py-6 flex flex-col gap-4">
             {messages.map((m) => (
               <MessageBubble
                 key={m.id}
@@ -278,7 +283,7 @@ export default function Chat() {
               e.preventDefault();
               handleSend(input);
             }}
-            className="flex gap-3 items-end max-w-3xl mx-auto"
+            className="flex gap-3 items-end w-[48rem] mx-auto"
           >
             <textarea
               ref={textareaRef}
