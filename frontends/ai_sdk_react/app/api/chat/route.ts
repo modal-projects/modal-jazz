@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     tools: {
       ...(webSearchTool && { webSearch: webSearchTool }),
     },
-    stopWhen: stepCountIs(5),
+    stopWhen: stepCountIs(20),
   });
 
   return result.toUIMessageStreamResponse();
