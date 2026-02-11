@@ -73,7 +73,7 @@ dg_cache_vol = modal.Volume.from_name("deepgemm-cache", create_if_missing=True)
 dg_cache_path = "/root/.cache/deep_gemm"
 
 
-REPO_ID = "zai-org/GLM-5-0127-FP8"
+REPO_ID = "zai-org/GLM-5-FP8"
 
 
 def compile_deep_gemm():
