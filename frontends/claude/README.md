@@ -8,18 +8,14 @@ Claude Code sends requests using Anthropic model IDs (e.g. `claude-sonnet-4-5-20
 
 ## Setup
 
-1. Copy `.env.example` to `.env` and update `LLM_BACKEND_URL` to point to your Modal-deployed jazz backend (including `/v1` suffix).
+1. Copy `.env.example` to `.env`.
 
-2. Dev deploy (temporary endpoint for testing):
+2. In the `.env` file, update `LLM_BACKEND_URL` to point to your Modal-deployed LLM backend (including the `/v1` suffix) and add an `LLM_BACKEND_API_KEY` if necessary.
 
-   ```bash
-   modal serve app.py --env <your-environment>
-   ```
-
-3. Production deploy:
+3. Deploy:
 
    ```bash
-   modal deploy app.py --env <your-environment>
+   uvx --with python-dotenv modal deploy litellm_proxy.py
    ```
 
 ## Configure Claude Code
@@ -27,18 +23,10 @@ Claude Code sends requests using Anthropic model IDs (e.g. `claude-sonnet-4-5-20
 Point Claude Code at the proxy:
 
 ```bash
-export ANTHROPIC_BASE_URL=<your-sandproxy-url>
+export ANTHROPIC_BASE_URL=<your-proxy-url>
 ```
 
-## Model mapping
-
-| Claude Code sends | Routed to |
-|---|---|
-| `claude-sonnet-4-5-20250929` | `llm` (jazz backend) |
-| `claude-opus-4-6` | `llm` (jazz backend) |
-| `claude-haiku-4-5-20251001` | `llm` (jazz backend) |
-
-## Swapping providers/models
+## Advanced configuration
 
 Edit `litellm_config.yaml` to change the backend. For example, to use a different provider:
 
@@ -50,4 +38,4 @@ Edit `litellm_config.yaml` to change the backend. For example, to use a differen
     api_key: "os.environ/YOUR_API_KEY"
 ```
 
-Then redeploy with `modal deploy app.py --env <your-environment>`.
+Then redeploy.

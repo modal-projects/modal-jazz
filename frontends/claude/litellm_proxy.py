@@ -15,12 +15,13 @@ litellm_image = (
     )
 )
 
-app = modal.App("sandproxy", image=litellm_image)
+app = modal.App("litellm-proxy", image=litellm_image)
 
 
 @app.function(
     scaledown_window=300,
     timeout=600,
+    secrets=[modal.Secret.from_dotenv()],
 )
 @modal.concurrent(max_inputs=100)
 @modal.web_server(port=LITELLM_PORT, startup_timeout=120)
@@ -30,6 +31,7 @@ def serve():
     subprocess.Popen(
         [
             "litellm",
+            "--debug",
             "--config", "/app/config.yaml",
             "--host", "0.0.0.0",
             "--port", str(LITELLM_PORT),
