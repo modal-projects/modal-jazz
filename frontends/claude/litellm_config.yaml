@@ -1,19 +1,19 @@
 model_list:
   - model_name: claude-sonnet-4-5-20250929
     litellm_params:
-      model: openai/zai-org/GLM-4.7-FP8
+      model: openai/zai-org/GLM-5-FP8
       api_base: "os.environ/LLM_BACKEND_URL"
       api_key: "os.environ/LLM_BACKEND_API_KEY"
 
   - model_name: claude-opus-4-6
     litellm_params:
-      model: openai/zai-org/GLM-4.7-FP8
+      model: openai/zai-org/GLM-5-FP8
       api_base: "os.environ/LLM_BACKEND_URL"
       api_key: "os.environ/LLM_BACKEND_API_KEY"
 
   - model_name: claude-haiku-4-5-20251001
     litellm_params:
-      model: openai/zai-org/GLM-4.7-FP8
+      model: openai/zai-org/GLM-5-FP8
       api_base: "os.environ/LLM_BACKEND_URL"
       api_key: "os.environ/LLM_BACKEND_API_KEY"
 
