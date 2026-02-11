@@ -25,6 +25,11 @@ It is run using:
 
 For a single user, this achieves > 60 tok/s output.
 
+You can also use a [free multitenant endpoint from Modal](https://modal.com/glm-5-endpoint).
+The endpoint is free until April 30, 2026.
+Users are limited to no more than one concurrent request.
+See the instructions there for the API URL and authentication information.
+
 ## Open Frontends - `/frontends`
 
 ### Agentic Coding TUI + WebUI - OpenCode
