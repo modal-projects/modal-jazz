@@ -5,7 +5,7 @@
             "npm": "@ai-sdk/openai-compatible",
             "name": "Modal",
             "options": {
-                "baseURL": "https://api.us-east-1.modal-dev.direct/v1",
+                "baseURL": "https://api.us-west-2.modal.direct/v1",
                 "apiKey": "{env:LLM_BACKEND_API_KEY}"
             },
             "models": {
