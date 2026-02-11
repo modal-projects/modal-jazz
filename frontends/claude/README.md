@@ -1,4 +1,4 @@
-# sandproxy
+# Claude Code Proxy
 
 LiteLLM proxy on Modal that routes Claude Code requests to open-source models.
 
