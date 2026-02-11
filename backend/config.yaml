@@ -1,10 +1,11 @@
  # General Config
  host: 0.0.0.0
  log-level: debug  # very noisy
+ dist-timeout: 3600
 
  # Model Config
  tool-call-parser: glm47
- reasoning-parser: glm45
+ reasoning-parser: deepseek-r1
  trust-remote-code: true
 
  # Memory
@@ -21,4 +22,4 @@
  cuda-graph-max-bs: 32
 
  # SpecDec (speed up low/moderate concurrency)
- speculative-algorithm: EAGLE  # built into GLM 4.7, is just multi-token prediction
+ speculative-algorithm: EAGLE

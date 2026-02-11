@@ -8,15 +8,15 @@ Copy the sample `opencode` config.
 cp sample.opencode.json opencode.json
 ```
 
-Put the backend URL into the `baseURL` field (including the `/v1` suffix).
-
-Then run
+Then add your API key to your environment variables
+under the name `LLM_BACKEND_API_KEY`
+while running `opencode`, e.g.
 
 ```bash
-opencode
+LLM_BACKEND_API_KEY=your-key-here opencode
 ```
 
-and you should see "LLM Modal Jazz" as the model name.
+and you should see "GLM-5 Modal" as the model name.
 
 ## Running OpenCode on Modal
 

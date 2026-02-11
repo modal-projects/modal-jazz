@@ -6,6 +6,7 @@ const provider = createOpenAICompatible({
   name: "jazz",
   baseURL:
     process.env.LLM_BACKEND_URL || "",
+  apiKey: process.env.LLM_BACKEND_API_KEY ?? "",
 });
 
 export async function POST(req: Request) {
@@ -16,7 +17,7 @@ export async function POST(req: Request) {
     : null;
 
   const result = streamText({
-    model: provider.chatModel("llm"),
+    model: provider.chatModel("zai-org/GLM-5-FP8"),
     messages: await convertToModelMessages(messages),
     tools: {
       ...(webSearchTool && { webSearch: webSearchTool }),

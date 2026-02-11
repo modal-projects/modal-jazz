@@ -14,19 +14,21 @@ that help it complete useful tasks. It uses [Modal](https://modal.com).
 
 ## Open Language Modeling Backend
 
-The language model is [Zhipu AI's GLM 4.7](https://docs.z.ai/guides/llm/glm-4.7).
+The language model is [z.ai's GLM 5](https://docs.z.ai/guides/llm/glm-5).
 
 It is run using:
 
 - Nvidia B200 GPUs
 - The [Modal](https://modal.com/) cloud deployment platform (project sponsor)
 - The [SGLang inference server](https://github.com/sgl-project/sglang)
-  - in a [custom build](https://hub.docker.com/layers/modalresearch/sglang/v0.5.7-fa4-preview/images/sha256-a0fe42112f9c90aed2571816bef9b4cb46ba0a7872c63e7b94fe514ac303993b)
-  with improved support for [Flash Attention 4](https://modal.com/blog/reverse-engineer-flash-attention-4)
 - The OpenAI-compatible API interface (based on `/chat/completions`).
 
-For a single user, this achieves > 100 tok/s output,
-roughly in line with [performance reported in Artificial Analysis](https://artificialanalysis.ai/models/glm-4-7-non-reasoning).
+For a single user, this achieves > 60 tok/s output.
+
+You can also use a [free multitenant endpoint from Modal](https://modal.com/glm-5-endpoint).
+The endpoint is free until April 30, 2026.
+Users are limited to no more than one concurrent request.
+See the instructions there for the API URL and authentication information.
 
 ## Open Frontends - `/frontends`
 
@@ -46,7 +48,7 @@ and for deploying OpenCode servers on Modal
 [OpenClaw](https://docs.openclaw.ai) is an agentic assistant system
 designed for maximum integrability.
 
-We provide instructions for integration the self-hosted LLM with OpenClaw
+We provide instructions for integrating the self-hosted LLM with OpenClaw
 [here](./frontends/openclaw/README.md).
 
 ### Chat Web UI - AI SDK

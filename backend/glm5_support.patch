@@ -1,0 +1,329 @@
+From 989ec19a2372ba3b5ac292574aed31dec6d651d2 Mon Sep 17 00:00:00 2001
+From: timmy-feng <timothy@modal.com>
+Date: Fri, 6 Feb 2026 23:17:10 +0000
+Subject: [PATCH] glm5 patch
+
+---
+ python/sglang/srt/configs/model_config.py                  | 4 +++-
+ .../compressed_tensors/compressed_tensors_moe.py           | 2 +-
+ python/sglang/srt/models/glm4_moe.py                       | 7 ++++++-
+ python/sglang/srt/server_args.py                           | 5 +++++
+ 4 files changed, 15 insertions(+), 3 deletions(-)
+
+diff --git a/python/sglang/srt/configs/model_config.py b/python/sglang/srt/configs/model_config.py
+index 895be366b..4415ce712 100644
+--- a/python/sglang/srt/configs/model_config.py
++++ b/python/sglang/srt/configs/model_config.py
+@@ -61,6 +61,7 @@ def is_deepseek_nsa(config: PretrainedConfig) -> bool:
+             "DeepseekV3ForCausalLMNextN",
+             "MistralLarge3ForCausalLM",
+             "PixtralForConditionalGeneration",
++            "GlmMoeDsaForCausalLM",
+         ]
+         and getattr(config, "index_topk", None) is not None
+     )
+@@ -273,7 +274,7 @@ class ModelConfig:
+
+         if (
+             is_draft_model
+-            and self.hf_config.architectures[0] == "DeepseekV3ForCausalLM"
++            and self.hf_config.architectures[0] in ["DeepseekV3ForCausalLM", "GlmMoeDsaForCausalLM"]
+         ):
+             self.hf_config.architectures[0] = "DeepseekV3ForCausalLMNextN"
+
+@@ -412,6 +413,7 @@ class ModelConfig:
+             or "DeepseekV3ForCausalLM" in self.hf_config.architectures
+             or "DeepseekV3ForCausalLMNextN" in self.hf_config.architectures
+             or "Glm4MoeLiteForCausalLM" in self.hf_config.architectures
++            or "GlmMoeDsaForCausalLM" in self.hf_config.architectures
+             or "LongcatFlashForCausalLM" in self.hf_config.architectures
+             or "LongcatFlashForCausalLMNextN" in self.hf_config.architectures
+             or "DotsVLMForCausalLM" in self.hf_config.architectures
+diff --git a/python/sglang/srt/layers/quantization/compressed_tensors/compressed_tensors_moe.py b/python/sglang/srt/layers/quantization/compressed_tensors/compressed_tensors_moe.py
+index 1b876b3a9..cc6221353 100644
+--- a/python/sglang/srt/layers/quantization/compressed_tensors/compressed_tensors_moe.py
++++ b/python/sglang/srt/layers/quantization/compressed_tensors/compressed_tensors_moe.py
+@@ -88,7 +88,7 @@ if is_flashinfer_available():
+     from flashinfer.fp4_quantization import block_scale_interleave
+     from flashinfer.fused_moe import (
+         convert_to_block_layout,
+-        trtllm_mxint4_block_scale_moe,
++        # trtllm_mxint4_block_scale_moe,
+     )
+     from flashinfer.fused_moe.core import (
+         _maybe_get_cached_w3_w1_permute_indices,
+diff --git a/python/sglang/srt/models/glm4_moe.py b/python/sglang/srt/models/glm4_moe.py
+index 3954f501f..e3eeb7d10 100644
+--- a/python/sglang/srt/models/glm4_moe.py
++++ b/python/sglang/srt/models/glm4_moe.py
+@@ -79,6 +79,7 @@ from sglang.srt.layers.vocab_parallel_embedding import (
+ from sglang.srt.model_executor.cuda_graph_runner import get_is_capture_mode
+ from sglang.srt.model_executor.forward_batch_info import ForwardBatch, PPProxyTensors
+ from sglang.srt.model_loader.weight_utils import default_weight_loader
++from sglang.srt.models.deepseek_v2 import DeepseekV2ForCausalLM
+ from sglang.srt.models.utils import apply_qk_norm
+ from sglang.srt.server_args import get_global_server_args
+ from sglang.srt.utils import (
+@@ -1279,4 +1280,8 @@ class Glm4MoeForCausalLM(nn.Module):
+             self.model.layers_to_capture = [val + 1 for val in layer_ids]
+
+
+-EntryClass = [Glm4MoeForCausalLM]
++class GlmMoeDsaForCausalLM(DeepseekV2ForCausalLM):
++    pass
++
++
++EntryClass = [Glm4MoeForCausalLM, GlmMoeDsaForCausalLM]
+diff --git a/python/sglang/srt/server_args.py b/python/sglang/srt/server_args.py
+index 6a1eb50d6..0987ef393 100644
+--- a/python/sglang/srt/server_args.py
++++ b/python/sglang/srt/server_args.py
+@@ -1191,6 +1191,7 @@ class ServerArgs:
+
+         if model_arch in [
+             "DeepseekV3ForCausalLM",
++            "GlmMoeDsaForCausalLM",
+             "KimiK25ForConditionalGeneration",
+             "MistralLarge3ForCausalLM",
+             "PixtralForConditionalGeneration",
+@@ -1647,6 +1648,7 @@ class ServerArgs:
+                 "GptOssForCausalLM",
+                 "Glm4MoeForCausalLM",
+                 "Glm4MoeLiteForCausalLM",
++                "GlmMoeDsaForCausalLM",
+                 "Qwen3MoeForCausalLM",
+                 "KimiK25ForConditionalGeneration",
+             ]
+@@ -2319,6 +2321,7 @@ class ServerArgs:
+                 "DeepseekV3ForCausalLM",
+                 "Glm4MoeForCausalLM",
+                 "Glm4MoeLiteForCausalLM",
++                "GlmMoeDsaForCausalLM",
+                 "BailingMoeForCausalLM",
+                 "BailingMoeV2ForCausalLM",
+                 "MistralLarge3ForCausalLM",
+@@ -2646,6 +2649,7 @@ class ServerArgs:
+                         "DeepseekV2ForCausalLM",
+                         "DeepseekV3ForCausalLM",
+                         "DeepseekV32ForCausalLM",
++                        "GlmMoeDsaForCausalLM",
+                         "MistralLarge3ForCausalLM",
+                         "PixtralForConditionalGeneration",
+                     ]
+@@ -5644,6 +5648,7 @@ def auto_choose_speculative_params(self: ServerArgs):
+         "GptOssForCausalLM",
+         "Glm4MoeForCausalLM",
+         "Glm4MoeLiteForCausalLM",
++        "GlmMoeDsaForCausalLM",
+         "BailingMoeForCausalLM",
+         "BailingMoeV2ForCausalLM",
+         "MistralLarge3ForCausalLM",
+--
+2.47.3
+
+From d52cbe8aac4731bb472ac096e728c8f9f6019476 Mon Sep 17 00:00:00 2001
+From: timmy-feng <timothy@modal.com>
+Date: Mon, 9 Feb 2026 07:53:16 +0000
+Subject: [PATCH] fix specdec + nsa max context overflow bug
+
+---
+ python/sglang/srt/layers/attention/nsa_backend.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/python/sglang/srt/layers/attention/nsa_backend.py b/python/sglang/srt/layers/attention/nsa_backend.py
+index 2de045c82..a54a3f6d1 100644
+--- a/python/sglang/srt/layers/attention/nsa_backend.py
++++ b/python/sglang/srt/layers/attention/nsa_backend.py
+@@ -287,7 +287,7 @@ class NativeSparseAttnBackend(
+             model_runner.token_to_kv_pool.nsa_kv_cache_store_fp8
+         )
+         self.nsa_index_topk = get_nsa_index_topk(model_runner.model_config.hf_config)
+-        self.max_context_len = model_runner.model_config.context_len
++        self.max_context_len = model_runner.req_to_token_pool.max_context_len
+         self.num_q_heads = (
+             model_runner.model_config.num_attention_heads // get_attention_tp_size()
+         )
+--
+2.47.3
+
+From 71b0682cd9579fd105659df7cde8ae496ecde179 Mon Sep 17 00:00:00 2001
+From: timmy-feng <timothy@modal.com>
+Date: Mon, 9 Feb 2026 08:18:27 +0000
+Subject: [PATCH] fix get k and s triton kernel grid size
+
+---
+ .../attention/nsa/index_buf_accessor.py       | 67 +++++++++++++++++--
+ .../attention/nsa/test_index_buf_accessor.py  | 25 +++----
+ 2 files changed, 74 insertions(+), 18 deletions(-)
+
+diff --git a/python/sglang/srt/layers/attention/nsa/index_buf_accessor.py b/python/sglang/srt/layers/attention/nsa/index_buf_accessor.py
+index 41ce7fe9e..4db27c6ed 100644
+--- a/python/sglang/srt/layers/attention/nsa/index_buf_accessor.py
++++ b/python/sglang/srt/layers/attention/nsa/index_buf_accessor.py
+@@ -165,6 +165,61 @@ class GetKAndS:
+     def execute(cls, *args, **kwargs):
+         return cls.triton(*args, **kwargs)
+
++    @classmethod
++    def torch_fast(
++        cls,
++        pool: "NSATokenToKVPool",
++        buf: torch.Tensor,
++        page_indices: torch.Tensor,
++        seq_len_tensor: torch.Tensor,
++        seq_len_sum: int,
++        max_seq_len: int,
++    ):
++        """
++        Torch implementation for gathering both K and S data from paged buffer.
++
++        :param page_indices: (batch_size, num_pages), int32/int64
++        :param seq_len_tensor: (batch_size,), int32/int64
++        :param seq_len_sum: sum of all sequence len
++        :param max_seq_len: max of all sequence len (unused here, kept for API compatibility)
++        :return: tuple of (k_fp8, k_scale) where
++                 k_fp8: (seq_len_sum, index_head_dim), uint8
++                 k_scale: (seq_len_sum, 4), uint8
++        """
++        device = buf.device
++        index_head_dim = pool.index_head_dim
++        page_size = pool.page_size
++        s_offset_in_page = page_size * index_head_dim
++
++        seq_lens = seq_len_tensor.to(torch.int64)
++        batch_size = seq_lens.numel()
++
++        batch_ids = torch.repeat_interleave(
++            torch.arange(batch_size, device=device, dtype=torch.int64), seq_lens
++        )
++        total_tokens = batch_ids.numel()
++
++        # token id within each sequence, ordered by [batch0 tokens, batch1 tokens, ...]
++        seq_starts = torch.cumsum(seq_lens, dim=0) - seq_lens
++        token_ids = torch.arange(total_tokens, device=device, dtype=torch.int64)
++        token_ids = token_ids - torch.repeat_interleave(seq_starts, seq_lens)
++
++        page_idx = torch.div(token_ids, page_size, rounding_mode="floor")
++        token_offset_in_page = token_ids % page_size
++        page_index = page_indices[batch_ids, page_idx].to(torch.int64)
++
++        # K bytes are stored first in each page.
++        k_view = buf[:, :s_offset_in_page].view(-1, page_size, index_head_dim)
++        k_out = k_view[page_index, token_offset_in_page]
++
++        # S bytes (fp32 scale bytes) are stored after K bytes.
++        s_view = buf[:, s_offset_in_page : s_offset_in_page + page_size * 4].view(
++            -1, page_size, 4
++        )
++        s_out = s_view[page_index, token_offset_in_page]
++
++        return k_out, s_out
++
+     @classmethod
+     def triton(
+         cls,
+@@ -621,10 +676,10 @@ def _get_k_and_s_triton(
+     This is more efficient than calling GetK and GetS separately.
+
+     :param buf: (num_pages, page_size * 128 + page_size * 4), uint8
+-    :param page_indices: (num_pages,), int32/int64
++    :param page_indices: (batch_size, num_pages), int32/int64
+     :param seq_lens: tensor of sequence lens, int64
+     :param seq_len_sum: sum of all sequence len, int32
+-    :param seq_len_sum: max of sequence len, int32
++    :param max_seq_len: max of sequence len, int32
+     :param page_size: int, typically 64
+     :param index_head_dim: int, typically 128
+     :return: tuple of (k_out, s_out) where
+@@ -643,7 +698,7 @@ def _get_k_and_s_triton(
+
+     # Launch kernel with one thread per token
+     seq_num = seq_lens.shape[0]
+-    grid = (seq_num, max_seq_len)
++    grid = (max_seq_len, seq_num)
+     seq_num_pow2 = 1
+     while seq_num_pow2 < seq_num:
+         seq_num_pow2 *= 2
+@@ -683,11 +738,11 @@ def _get_k_and_s_triton_kernel(
+ ):
+     """
+     Fused kernel that gathers both K and S data in a single pass.
+-    Each program handles one token (seq_len tokens total).
++    Each program handles one (token, batch) pair.
+     Loads 128 bytes (K) + 4 bytes (S) from the appropriate page.
+     """
+-    batch_id = tl.program_id(0)
+-    token_id = tl.program_id(1)
++    token_id = tl.program_id(0)
++    batch_id = tl.program_id(1)
+
+     # Calculate which page and offset within page
+     page_idx = token_id // page_size
+diff --git a/test/manual/layers/attention/nsa/test_index_buf_accessor.py b/test/manual/layers/attention/nsa/test_index_buf_accessor.py
+index 4e38b859f..e4e5ff24e 100644
+--- a/test/manual/layers/attention/nsa/test_index_buf_accessor.py
++++ b/test/manual/layers/attention/nsa/test_index_buf_accessor.py
+@@ -249,16 +249,17 @@ class TestGetS:
+
+ @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA not available")
+ class TestGetKAndS:
+-    """Test cases for GetKAndS.triton() correctness."""
++    """Test cases for GetKAndS.triton() / GetKAndS.torch_fast() correctness."""
+
+     @pytest.mark.parametrize("num_pages", [1, 2, 4, 8, 16])
+-    @pytest.mark.parametrize("seq_len", [64, 128, 256, 512, 1024])
++    @pytest.mark.parametrize("seq_len", [64, 128, 256, 512, 1024, 65536 + 17])
+     @pytest.mark.parametrize("page_size", [64])
+     @pytest.mark.parametrize("index_head_dim", [128])
++    @pytest.mark.parametrize("impl_name", ["triton", "torch_fast"])
+     def test_get_k_and_s_correctness(
+-        self, num_pages, seq_len, page_size, index_head_dim
++        self, num_pages, seq_len, page_size, index_head_dim, impl_name
+     ):
+-        """Test GetKAndS.triton() produces same output as separate torch_fast calls."""
++        """Test GetKAndS implementation outputs match separate GetK/GetS torch_fast."""
+         device = torch.device("cuda")
+
+         # Ensure seq_len doesn't exceed available pages
+@@ -290,31 +291,31 @@ class TestGetKAndS:
+         k_torch = GetK.torch_fast(pool, buf, seq_len, page_indices)
+         s_torch = GetS.torch_fast(pool, buf, seq_len, page_indices)
+
+-        # Run fused Triton implementation
+-        k_triton, s_triton = GetKAndS.triton(
++        # Run selected GetKAndS implementation
++        k_out, s_out = getattr(GetKAndS, impl_name)(
+             pool, buf, page_indices_, seq_len_tensor, seq_len, seq_len
+         )
+
+         # Verify shapes
+         assert k_torch.shape == (seq_len, index_head_dim)
+         assert s_torch.shape == (seq_len, 4)
+-        assert k_triton.shape == (seq_len, index_head_dim)
+-        assert s_triton.shape == (seq_len, 4)
++        assert k_out.shape == (seq_len, index_head_dim)
++        assert s_out.shape == (seq_len, 4)
+
+         # Verify dtypes
+         assert k_torch.dtype == torch.uint8
+         assert s_torch.dtype == torch.uint8
+-        assert k_triton.dtype == torch.uint8
+-        assert s_triton.dtype == torch.uint8
++        assert k_out.dtype == torch.uint8
++        assert s_out.dtype == torch.uint8
+
+         # Compare K results
+         torch.testing.assert_close(
+-            k_triton, k_torch, rtol=0, atol=0, msg="GetKAndS K outputs differ"
++            k_out, k_torch, rtol=0, atol=0, msg="GetKAndS K outputs differ"
+         )
+
+         # Compare S results
+         torch.testing.assert_close(
+-            s_triton, s_torch, rtol=0, atol=0, msg="GetKAndS S outputs differ"
++            s_out, s_torch, rtol=0, atol=0, msg="GetKAndS S outputs differ"
+         )
+
+     def test_get_k_and_s_sequential_pages(self):
+--
+2.47.3

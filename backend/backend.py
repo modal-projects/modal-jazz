@@ -1,4 +1,4 @@
-# Test
+# Test (APP_USE_DUMMY_WEIGHTS=0 when testing GLM 5)
 # ```bash
 # APP_USE_DUMMY_WEIGHTS=1 modal run backend.py
 # ```
@@ -21,10 +21,32 @@ import modal.experimental
 
 here = Path(__file__).parent
 
-image = modal.Image.from_registry("modalresearch/sglang:v0.5.7-fa4-preview").entrypoint(
-    []
+image = modal.Image.from_registry("lmsysorg/sglang:v0.5.8").entrypoint([])
+
+image = image.uv_pip_install("transformers==5.0.0")
+
+# patch SGLang and DeepGemm for GLM 5 support
+image = (
+    image.add_local_file(
+        here / "glm5_support.patch",
+        "/root/glm5_support.patch",
+        copy=True,
+    )
+    .run_commands(
+        "cd /sgl-workspace/sglang",
+        "git fetch origin pull/18297/head:glm5_support",
+        "git checkout glm5_support",
+        "git apply /root/glm5_support.patch",
+    )
+    .run_commands(
+        "rm -rf /root/.cache/deep_gemm/cache || true",
+        "curl -L 'https://raw.githubusercontent.com/deepseek-ai/DeepGEMM/477618cd51baffca09c4b0b87e97c03fe827ef03/deep_gemm/include/deep_gemm/impls/sm100_fp8_mqa_logits.cuh' "
+        "-o /usr/local/lib/python3.12/dist-packages/deep_gemm/include/deep_gemm/impls/sm100_fp8_mqa_logits.cuh",
+    )
 )
 
+# TODO: download to `examples`
+hf_cache_path = "/root/.cache/huggingface"
 hf_cache_vol = modal.Volume.from_name("huggingface-cache", create_if_missing=True)
 
 USE_DUMMY_WEIGHTS = os.environ.get("APP_USE_DUMMY_WEIGHTS", "0") == "1"
@@ -33,7 +55,10 @@ image = image.env(
     {
         "HF_XET_HIGH_PERFORMANCE": "1",  # faster downloads
         "APP_USE_DUMMY_WEIGHTS": str(int(USE_DUMMY_WEIGHTS)),
-        "SGLANG_ENABLE_SPEC_V2": "1",
+        "SGLANG_ALLOW_OVERWRITE_LONGER_CONTEXT_LEN": "1",
+        "SGLANG_JIT_DEEPGEMM_FAST_WARMUP": "1",
+        "SGLANG_NSA_FORCE_MLA": "1",
+        "SGLANG_LOCAL_IP_NIC": "overlay0",
     }
 )
 
@@ -44,7 +69,32 @@ def download_model(repo_id, revision=None):
     snapshot_download(repo_id=repo_id, revision=revision)
 
 
-REPO_ID = "zai-org/GLM-4.7-FP8"
+dg_cache_vol = modal.Volume.from_name("deepgemm-cache", create_if_missing=True)
+dg_cache_path = "/root/.cache/deep_gemm"
+
+
+REPO_ID = "zai-org/GLM-5-0127-FP8"
+
+
+def compile_deep_gemm():
+    import os
+
+    if int(os.environ.get("SGLANG_ENABLE_JIT_DEEPGEMM", "1")):
+        subprocess.run(
+            f"python3 -m sglang.compile_deep_gemm --model-path {REPO_ID} --tp {GPU_COUNT}",
+            shell=True,
+        )
+
+
+GPU_TYPE = "B200"
+GPU_COUNT = 8
+GPU = f"{GPU_TYPE}:{GPU_COUNT}"
+
+# image = image.run_function(
+#     compile_deep_gemm,
+#     volumes={dg_cache_path: dg_cache_vol, hf_cache_path: hf_cache_vol},
+#     gpu=GPU,
+# )
 
 if not USE_DUMMY_WEIGHTS:  # skip download if we don't need real weights
     image = image.run_function(
@@ -94,8 +144,11 @@ def _start_server() -> subprocess.Popen:
         REPO_ID,
         "--served-model-name",
         "llm",
-        "--tp-size",
+        "--tp",
         str(GPU_COUNT),
+        "--dp",
+        str(GPU_COUNT),
+        "--enable-dp-attention",
         "--config",
         "/root/config.yaml",
     ]
@@ -116,9 +169,6 @@ with image.imports():
 
 app = modal.App("jazz-backend", image=image)
 
-GPU_TYPE = "B200"
-GPU_COUNT = 4
-
 REGION = "us"
 PROXY_REGIONS = ["us-east"]
 
@@ -137,7 +187,7 @@ MINUTES = 60  # seconds
     gpu=f"{GPU_TYPE}:{GPU_COUNT}",
     scaledown_window=20 * MINUTES,  # how long should we stay up with no requests?
     timeout=30 * MINUTES,  # how long should we wait for container start?
-    volumes={"/root/.cache/huggingface": hf_cache_vol},
+    volumes={hf_cache_path: hf_cache_vol, dg_cache_path: dg_cache_vol},
     region=REGION,
     min_containers=MIN_CONTAINERS,
 )
@@ -183,7 +233,7 @@ def wait_for_server_ready():
 
 
 @app.local_entrypoint()
-async def test(test_timeout=20 * MINUTES, content=None, twice=True):
+async def test(test_timeout=60 * MINUTES, content=None, twice=True):
     """Test the model serving endpoint"""
     url = Server._experimental_get_flash_urls()[0]
 
@@ -206,7 +256,7 @@ async def test(test_timeout=20 * MINUTES, content=None, twice=True):
         await probe(url, messages, timeout=1 * MINUTES)
 
 
-async def probe(url, messages, timeout=20 * MINUTES):
+async def probe(url, messages, timeout=60 * MINUTES):
     """Send request with retry logic for startup delays"""
     deadline = time.time() + timeout
     async with aiohttp.ClientSession(base_url=url) as session:

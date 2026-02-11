@@ -1,18 +1,19 @@
 {
     "$schema": "https://opencode.ai/config.json",
     "provider": {
-        "modal-jazz": {
+        "modal": {
             "npm": "@ai-sdk/openai-compatible",
-            "name": "Modal Jazz",
+            "name": "Modal",
             "options": {
-                "baseURL": ""
+                "baseURL": "https://api.us-east-1.modal-dev.direct/v1",
+                "apiKey": "{env:LLM_BACKEND_API_KEY}"
             },
             "models": {
-                "llm": {
-                    "name": "LLM"
+                "zai-org/GLM-5-FP8": {
+                    "name": "GLM-5"
                 }
             }
         }
     },
-    "model": "modal-jazz/llm"
+    "model": "modal/zai-org/GLM-5-FP8"
 }
