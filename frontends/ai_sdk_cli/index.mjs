@@ -9,11 +9,12 @@ const panic = (msg) => { throw new Error(msg) };
 const provider = createOpenAICompatible({
   name: "jazz",
   baseURL:
-    process.env.LLM_BACKEND_URL ?? panic("provide an LLM_BACKEND_URL")
+    process.env.LLM_BACKEND_URL ?? panic("provide an LLM_BACKEND_URL"),
+  apiKey: process.env.LLM_BACKEND_API_KEY ?? "",
 });
 
 const result = streamText({
-  model: provider.chatModel("llm"),
+  model: provider.chatModel("zai-org/GLM-5-FP8"),
   messages: [
     { role: "system", content: "You are a helpful AI assistant." },
     { role: "user", content: process.argv[2] || "What is the capital of France?" },
