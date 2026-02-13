@@ -170,7 +170,7 @@ with image.imports():
 
 # ## Configure infrastructure
 
-app = modal.App("glm5-backend", image=image)
+app = modal.App("jazz-backend", image=image)
 
 REGION = "us"
 PROXY_REGIONS = ["us-east"]
