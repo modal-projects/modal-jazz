@@ -33,6 +33,8 @@ image = (
         copy=True,
     )
     .run_commands(
+        "git clone https://github.com/huggingface/transformers.git /transformers",
+        "cd /transformers && git checkout b2028e7 && pip install /transformers",
         "cd /sgl-workspace/sglang",
         "git fetch origin pull/18297/head:glm5_support",
         "git checkout glm5_support",
@@ -100,6 +102,7 @@ if not USE_DUMMY_WEIGHTS:  # skip download if we don't need real weights
     image = image.run_function(
         download_model,
         volumes={"/root/.cache/huggingface": hf_cache_vol},
+        secrets=[modal.Secret.from_name("huggingface-secret")],
         args=(REPO_ID,),
     )
 
