@@ -23,6 +23,10 @@ It is run using:
 - The [SGLang inference server](https://github.com/sgl-project/sglang)
 - The OpenAI-compatible API interface (based on `/chat/completions`).
 
+To speed up the model weight downloading process, you'll need to add a
+[Hugging Face](https://huggingface.co/) access token
+stored as a [Modal Secret](https://modal.com/secrets).
+
 For a single user, this achieves > 60 tok/s output.
 
 You can also use a [free multitenant endpoint from Modal](https://modal.com/glm-5-endpoint).
