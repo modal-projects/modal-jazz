@@ -21,35 +21,11 @@ import modal.experimental
 
 here = Path(__file__).parent
 
-image = modal.Image.from_registry("lmsysorg/sglang:v0.5.8").entrypoint([])
+image = modal.Image.from_registry("lmsysorg/sglang:deepseek-v4-blackwell").entrypoint([])
 
-image = image.uv_pip_install("transformers==5.0.0")
-
-# patch SGLang and DeepGemm for GLM 5 support
-image = (
-    image.add_local_file(
-        here / "glm5_support.patch",
-        "/root/glm5_support.patch",
-        copy=True,
-    )
-    .run_commands(
-        "git clone https://github.com/huggingface/transformers.git /transformers",
-        "cd /transformers && git checkout b2028e7 && pip install /transformers",
-        "cd /sgl-workspace/sglang",
-        "git fetch origin pull/18297/head:glm5_support",
-        "git checkout glm5_support",
-        "git apply /root/glm5_support.patch",
-    )
-    .run_commands(
-        "rm -rf /root/.cache/deep_gemm/cache || true",
-        "curl -L 'https://raw.githubusercontent.com/deepseek-ai/DeepGEMM/477618cd51baffca09c4b0b87e97c03fe827ef03/deep_gemm/include/deep_gemm/impls/sm100_fp8_mqa_logits.cuh' "
-        "-o /usr/local/lib/python3.12/dist-packages/deep_gemm/include/deep_gemm/impls/sm100_fp8_mqa_logits.cuh",
-    )
-)
-
-# TODO: download to `examples`
 hf_cache_path = "/root/.cache/huggingface"
-hf_cache_vol = modal.Volume.from_name("huggingface-cache", create_if_missing=True)
+hf_cache_vol = modal.Volume.from_name("huggingface-cache", environment_name="examples", create_if_missing=False)
+huggingface_secret = modal.Secret.from_name("huggingface-secret")
 
 USE_DUMMY_WEIGHTS = os.environ.get("APP_USE_DUMMY_WEIGHTS", "0") == "1"
 
@@ -57,10 +33,10 @@ image = image.env(
     {
         "HF_XET_HIGH_PERFORMANCE": "1",  # faster downloads
         "APP_USE_DUMMY_WEIGHTS": str(int(USE_DUMMY_WEIGHTS)),
-        "SGLANG_ALLOW_OVERWRITE_LONGER_CONTEXT_LEN": "1",
-        "SGLANG_JIT_DEEPGEMM_FAST_WARMUP": "1",
-        "SGLANG_NSA_FORCE_MLA": "1",
-        "SGLANG_LOCAL_IP_NIC": "overlay0",
+        "CUDA_VISIBLE_DEVICES": "0,1,2,3,4,5,6,7",
+        "SGLANG_ENABLE_SPEC_V2": "1",
+        "SGLANG_ENABLE_THINKING": "1",
+        "SGLANG_JIT_DEEPGEMM_PRECOMPILE": "0",
     }
 )
 
@@ -68,14 +44,14 @@ image = image.env(
 def download_model(repo_id, revision=None):
     from huggingface_hub import snapshot_download
 
-    snapshot_download(repo_id=repo_id, revision=revision)
+    snapshot_download(repo_id=repo_id, revision=revision, token=os.environ["HF_TOKEN"])
 
 
-dg_cache_vol = modal.Volume.from_name("deepgemm-cache", create_if_missing=True)
+dg_cache_vol = modal.Volume.from_name("deepgemm-cache-v2", create_if_missing=True)
 dg_cache_path = "/root/.cache/deep_gemm"
 
 
-REPO_ID = "zai-org/GLM-5-FP8"
+REPO_ID = "deepseek-ai/DeepSeek-V4-Pro"
 
 
 def compile_deep_gemm():
@@ -102,8 +78,9 @@ if not USE_DUMMY_WEIGHTS:  # skip download if we don't need real weights
     image = image.run_function(
         download_model,
         volumes={"/root/.cache/huggingface": hf_cache_vol},
-        secrets=[modal.Secret.from_name("huggingface-secret")],
+        secrets=[huggingface_secret],
         args=(REPO_ID,),
+        timeout = 24 * 60 * 60,
     )
 
 # ### Configure the inference engine
@@ -135,7 +112,6 @@ if modal.is_local():
 def _start_server() -> subprocess.Popen:
     """Start SGLang server in a subprocess"""
     cmd = [
-        f"HF_HUB_OFFLINE={1 - int(USE_DUMMY_WEIGHTS)}",
         "python",
         "-m",
         "sglang.launch_server",
@@ -147,11 +123,8 @@ def _start_server() -> subprocess.Popen:
         REPO_ID,
         "--served-model-name",
         "llm",
-        "--tp",
+        "--tp-size",
         str(GPU_COUNT),
-        "--dp",
-        str(GPU_COUNT),
-        "--enable-dp-attention",
         "--config",
         "/root/config.yaml",
     ]
@@ -183,14 +156,16 @@ TARGET_INPUTS = 10  # Concurrent requests per replica before scaling
 
 SGLANG_PORT = 8000
 MINUTES = 60  # seconds
+HOURS = 60 * MINUTES
 
 
 @app.cls(
     image=image,
     gpu=f"{GPU_TYPE}:{GPU_COUNT}",
     scaledown_window=20 * MINUTES,  # how long should we stay up with no requests?
-    timeout=30 * MINUTES,  # how long should we wait for container start?
+    timeout=3 * HOURS,  # how long should we wait for container start?
     volumes={hf_cache_path: hf_cache_vol, dg_cache_path: dg_cache_vol},
+    secrets=[huggingface_secret],
     region=REGION,
     min_containers=MIN_CONTAINERS,
 )
@@ -238,7 +213,7 @@ def wait_for_server_ready():
 @app.local_entrypoint()
 async def test(test_timeout=60 * MINUTES, content=None, twice=True):
     """Test the model serving endpoint"""
-    url = Server._experimental_get_flash_urls()[0]
+    url = (await Server._experimental_get_flash_urls.aio())[0]
 
     if USE_DUMMY_WEIGHTS:
         system_prompt = {"role": "system", "content": "This system produces gibberish."}

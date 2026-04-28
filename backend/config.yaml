@@ -1,17 +1,18 @@
  # General Config
  host: 0.0.0.0
  log-level: debug  # very noisy
- dist-timeout: 3600
 
  # Model Config
- tool-call-parser: glm47
- reasoning-parser: deepseek-r1
+ tool-call-parser: deepseekv4
+ reasoning-parser: deepseek-v4
  trust-remote-code: true
 
  # Memory
- mem-fraction-static: 0.85
- chunked-prefill-size: 32768
- kv-cache-dtype: fp8_e4m3
+ mem-fraction-static: 0.82
+ chunked-prefill-size: 4096
+
+ # MoE
+ moe-runner-backend: flashinfer_mxfp4
 
  # Observability
  enable-metrics: true
@@ -21,5 +22,11 @@
  max-running-requests: 32
  cuda-graph-max-bs: 32
 
- # SpecDec (speed up low/moderate concurrency)
+ # SpecDec (EAGLE, as recommended by the DeepSeek V4 release notes)
  speculative-algorithm: EAGLE
+ speculative-num-steps: 3
+ speculative-eagle-topk: 1
+ speculative-num-draft-tokens: 4
+
+ # Tuning
+ disable-flashinfer-autotune: true
