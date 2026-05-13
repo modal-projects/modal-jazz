@@ -17,7 +17,7 @@ export async function POST(req: Request) {
     : null;
 
   const result = streamText({
-    model: provider.chatModel("zai-org/GLM-5-FP8"),
+    model: provider.chatModel("deepseek-ai/DeepSeek-V4-Pro"),
     messages: await convertToModelMessages(messages),
     tools: {
       ...(webSearchTool && { webSearch: webSearchTool }),
