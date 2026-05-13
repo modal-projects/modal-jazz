@@ -14,7 +14,7 @@ that help it complete useful tasks. It uses [Modal](https://modal.com).
 
 ## Open Language Modeling Backend
 
-The language model is [z.ai's GLM 5](https://docs.z.ai/guides/llm/glm-5).
+The language model is [DeepSeek's V4 Pro](https://api-docs.deepseek.com/news/news260424).
 
 It is run using:
 
@@ -27,12 +27,7 @@ To speed up the model weight downloading process, you'll need to add a
 [Hugging Face](https://huggingface.co/) access token
 stored as a [Modal Secret](https://modal.com/secrets).
 
-For a single user, this achieves > 60 tok/s output.
-
-You can also use a [free multitenant endpoint from Modal](https://modal.com/glm-5-endpoint).
-The endpoint is free until April 30, 2026.
-Users are limited to no more than one concurrent request.
-See the instructions there for the API URL and authentication information.
+For a single user, this achieves >150 tok/s output.
 
 ## Open Frontends - `/frontends`
 
