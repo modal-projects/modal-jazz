@@ -18,6 +18,9 @@ export async function POST(req: Request) {
 
   const result = streamText({
     model: provider.chatModel("deepseek-ai/DeepSeek-V4-Pro"),
+    providerOptions: {
+      jazz: { reasoning: { enabled: true } },
+    },
     messages: await convertToModelMessages(messages),
     tools: {
       ...(webSearchTool && { webSearch: webSearchTool }),
