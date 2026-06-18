@@ -110,6 +110,7 @@ class JazzReasoning(llm.KeyModel):
             "model": opts.upstream_model,
             "stream": True,
             "messages": self._build_messages(prompt, conversation),
+            "reasoning": {"enabled": True}
         }
         if opts.temperature is not None:
             payload["temperature"] = opts.temperature
@@ -201,6 +202,7 @@ class JazzReasoning(llm.KeyModel):
             "model": opts.upstream_model,
             "stream": False,
             "messages": self._build_messages(prompt, conversation),
+            "reasoning": {"enabled": True}
         }
         if opts.temperature is not None:
             payload["temperature"] = opts.temperature
