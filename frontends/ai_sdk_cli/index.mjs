@@ -15,6 +15,9 @@ const provider = createOpenAICompatible({
 
 const result = streamText({
   model: provider.chatModel("deepseek-ai/DeepSeek-V4-Pro"),
+  providerOptions: {
+    jazz: { reasoning: { enabled: true } },
+  },
   messages: [
     { role: "system", content: "You are a helpful AI assistant." },
     { role: "user", content: process.argv[2] || "What is the capital of France?" },
